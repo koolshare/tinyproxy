@@ -29,12 +29,14 @@
  * Even if upstream support is not compiled into tinyproxy, this
  * structure still needs to be defined.
  */
+typedef enum {HTTP_TYPE, SOCKS4_TYPE, SOCKS5_TYPE} proxy_type;
 struct upstream {
 	struct upstream *next;
 	char *domain; /* optional */
 	char *host;
 	int port;
 	in_addr_t ip, mask;
+	proxy_type type;
 };
 
 struct config_s {

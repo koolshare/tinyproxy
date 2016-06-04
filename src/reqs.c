@@ -59,9 +59,11 @@
 #ifdef UPSTREAM_SUPPORT
 #  define UPSTREAM_CONFIGURED() (config.upstream_list != NULL)
 #  define UPSTREAM_HOST(host) upstream_get(host)
+#  define UPSTREAM_IS_HTTP(conn) (conn->upstream_proxy != NULL && conn->upstream_proxy->type == HTTP_TYPE)
 #else
 #  define UPSTREAM_CONFIGURED() (0)
 #  define UPSTREAM_HOST(host) (NULL)
+#  define UPSTREAM_IS_HTTP(up) (0)
 #endif
 
 /*
@@ -311,11 +313,21 @@ build_url(char **url, const char *host, int port, const char *path)
 #endif /* TRANSPARENT_PROXY */
 
 #ifdef UPSTREAM_SUPPORT
+char *
+proxy_type_name(proxy_type type)
+{
+    switch(type) {
+        case HTTP_TYPE: return "http";
+        case SOCKS4_TYPE: return "socks4";
+        case SOCKS5_TYPE: return "socks5";
+        default: return "unknown";
+    }
+}
 /*
  * Add an entry to the upstream list
  */
 void
-upstream_add(const char *host, int port, const char *domain)
+upstream_add(const char *host, int port, const char *domain, proxy_type type)
 {
 	char *ptr;
 	struct upstream *up = safemalloc(sizeof (struct upstream));
@@ -324,6 +336,8 @@ upstream_add(const char *host, int port, const char *domain)
 		log_message(LOG_ERR, "Unable to allocate memory in upstream_add()");
 		return;
 	}
+
+	up->type = type;
 
 	up->host = up->domain = NULL;
 	up->ip = up->mask = 0;
@@ -337,7 +351,7 @@ upstream_add(const char *host, int port, const char *domain)
 		up->host = safestrdup(host);
 		up->port = port;
 
-		log_message(LOG_INFO, "Added upstream %s:%d for [default]", host, port);
+		log_message(LOG_INFO, "Added upstream %s %s:%d for [default]", proxy_type_name(type), host, port);
 	} else if (host == NULL) {
 		if (!domain || domain[0] == '\0') {
 			log_message(LOG_WARNING, "Nonsense no-upstream rule: empty domain");
@@ -375,8 +389,8 @@ upstream_add(const char *host, int port, const char *domain)
 		up->port = port;
 		up->domain = safestrdup(domain);
 
-		log_message(LOG_INFO, "Added upstream %s:%d for %s",
-			    host, port, domain);
+		log_message(LOG_INFO, "Added upstream %s %s:%d for %s",
+			    proxy_type_name(type), host, port, domain);
 	}
 
 	if (!up->domain && !up->ip) { /* always add default to end */
@@ -456,8 +470,8 @@ upstream_get(char *host)
 		up = NULL;
 
 	if (up)
-		log_message(LOG_INFO, "Found proxy %s:%d for %s",
-				up->host, up->port, host);
+		log_message(LOG_INFO, "Found proxy %s %s:%d for %s",
+				proxy_type_name(up->type), up->host, up->port, host);
 	else
 		log_message(LOG_INFO, "No proxy for %s", host);
 
@@ -1069,10 +1083,10 @@ process_client_headers(struct conn_s *connptr, hashmap_t hashofheaders)
 	/*
 	 * Don't send headers if there's already an error, if the request was
 	 * a stats request, or if this was a CONNECT method (unless upstream
-	 * proxy is in use.)
+	 * http proxy is in use.)
 	 */
 	if (connptr->server_fd == -1 || connptr->show_stats
-	    || (connptr->connect_method && (connptr->upstream_proxy == NULL))) {
+	    || (connptr->connect_method && ! UPSTREAM_IS_HTTP(connptr))) {
 		log_message(LOG_INFO, "Not sending client headers to remote machine");
 		return 0;
 	}
@@ -1394,6 +1408,87 @@ relay_connection(struct conn_s *connptr)
 	return;
 }
 
+static int
+connect_to_upstream_proxy(struct conn_s *connptr, struct request_s *request)
+{
+	int len;
+	unsigned char buff[512]; /* won't use more than 7 + 255 */
+	unsigned short port;
+	struct hostent *host;
+	struct upstream *cur_upstream = connptr->upstream_proxy;
+
+	log_message(LOG_CONN,
+		    "Established connection to %s proxy \"%s\" using file descriptor %d.",
+		    proxy_type_name(cur_upstream->type), cur_upstream->host, connptr->server_fd);
+
+	if (cur_upstream->type == SOCKS4_TYPE) {
+
+		buff[0] = 4; // socks version
+		buff[1] = 1; // connect command
+		port = htons(request->port);
+		memcpy(&buff[2], &port, 2); // dest port
+		host = gethostbyname(request->host);
+		memcpy(&buff[4], host->h_addr_list[0], 4); // dest ip
+		buff[8] = 0; // user
+		if (9 != safe_write(connptr->server_fd, buff, 9))
+			return -1;
+		if (8 != safe_read(connptr->server_fd, buff, 8))
+			return -1;
+		if (buff[0]!=0 || buff[1]!=90)
+			return -1;
+
+	} else if (cur_upstream->type == SOCKS5_TYPE) {
+
+		/* init */
+		buff[0] = 5; // socks version
+		buff[1] = 1; // number of methods
+		buff[2] = 0; // no auth method
+		if (3 != safe_write(connptr->server_fd, buff, 3))
+			return -1;
+		if (2 != safe_read(connptr->server_fd, buff, 2))
+			return -1;
+		if (buff[0]!=5 || buff[1]!=0)
+			return -1;
+		/* connect */
+		buff[0] = 5; // socks version
+		buff[1] = 1; // connect
+		buff[2] = 0; // reserved
+		buff[3] = 3; // domainname
+		len=strlen(request->host);
+		if(len>255)
+			return -1;
+		buff[4] = len; // length of domainname
+		memcpy(&buff[5], request->host, len); // dest ip
+		port = htons(request->port);
+		memcpy(&buff[5+len], &port, 2); // dest port
+		if (7+len != safe_write(connptr->server_fd, buff, 7+len))
+			return -1;
+		if (4 != safe_read(connptr->server_fd, buff, 4))
+			return -1;
+		if (buff[0]!=5 || buff[1]!=0)
+			return -1;
+		switch(buff[3]) {
+			case 1: len=4; break; // ip v4
+			case 4: len=16; break; // ip v6
+			case 3: // domainname
+				if (1 != safe_read(connptr->server_fd, buff, 1))
+					return -1;
+				len = buff[0]; /* max = 255 */
+				break;
+			default: return -1;
+		}
+		if (2+len != safe_read(connptr->server_fd, buff, 2+len))
+			return -1;
+	} else {
+		return -1;
+	}
+                
+	if (connptr->connect_method)
+		return 0;
+
+	return establish_http_connection(connptr, request);
+}
+
 /*
  * Establish a connection to the upstream proxy server.
  */
@@ -1430,6 +1525,9 @@ connect_to_upstream(struct conn_s *connptr, struct request_s *request)
 				    NULL);
 		return -1;
 	}
+
+	if (cur_upstream->type != HTTP_TYPE)
+		return connect_to_upstream_proxy(connptr, request);
 
 	log_message(LOG_CONN,
 		    "Established connection to upstream proxy \"%s\" using file descriptor %d.",
@@ -1600,7 +1698,7 @@ handle_connection(int fd)
 		return;
 	}
 
-	if (!connptr->connect_method || (connptr->upstream_proxy != NULL)) {
+	if (!connptr->connect_method || UPSTREAM_IS_HTTP(connptr)) {
 		if (process_server_headers(connptr) < 0) {
 			if (connptr->error_variables)
 				send_http_error_message(connptr);

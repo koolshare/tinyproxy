@@ -57,6 +57,9 @@ int yylex(void);
 %token KW_STATPAGE
 %token KW_VIA_PROXY_NAME
 
+/* proxy types */
+%token KW_PROXY_HTTP KW_PROXY_SOCKS4 KW_PROXY_SOCKS5
+
 /* yes/no switches */
 %token KW_YES KW_NO
 
@@ -75,6 +78,7 @@ int yylex(void);
 %type <cptr> network_address
 %type <cptr> unique_address
 %type <num> loglevels
+%type <num> upstream_proxy
 
 %%
 
@@ -167,18 +171,18 @@ statement
 		  log_message(LOG_WARNING, "X-Tinyproxy header support was not compiled in.");
 #endif
 	   }
-        | KW_UPSTREAM unique_address ':' NUMBER
+        | upstream_proxy unique_address ':' NUMBER
           {
 #ifdef UPSTREAM_SUPPORT
-		  upstream_add($2, $4, NULL);
+		  upstream_add($2, $4, NULL, $1);
 #else
                   log_message(LOG_WARNING, "Upstream proxy support was not compiled in.");
 #endif
           }
-	| KW_UPSTREAM unique_address ':' NUMBER STRING
+	| upstream_proxy unique_address ':' NUMBER STRING
 	  {
 #ifdef UPSTREAM_SUPPORT
-		  upstream_add($2, $4, $5);
+		  upstream_add($2, $4, $5, $1);
 #else
                   log_message(LOG_WARNING, "Upstream proxy support was not compiled in.");
 #endif
@@ -186,7 +190,7 @@ statement
 	| KW_NO KW_UPSTREAM STRING
 	  {
 #ifdef UPSTREAM_SUPPORT
-		  upstream_add(NULL, 0, $3);
+		  upstream_add(NULL, 0, $3, 0);
 #else
                   log_message(LOG_WARNING, "Upstream proxy support was not compiled in.");
 #endif
@@ -220,6 +224,13 @@ statement
 		  config.stathost = $2;
 	  }
 	;
+
+upstream_proxy
+        : KW_UPSTREAM KW_PROXY_HTTP     { $$ = HTTP_TYPE; }
+        | KW_UPSTREAM KW_PROXY_SOCKS4   { $$ = SOCKS4_TYPE; }
+        | KW_UPSTREAM KW_PROXY_SOCKS5   { $$ = SOCKS5_TYPE; }
+        | KW_UPSTREAM                   { $$ = HTTP_TYPE; }
+        ;
 
 loglevels
         : KW_LOG_CRITICAL               { $$ = LOG_CRIT; }

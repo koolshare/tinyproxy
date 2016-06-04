@@ -60,6 +60,11 @@ static struct keyword keywords[] = {
 	{ "defaulterrorfile",    KW_DEFAULT_ERRORPAGE },
 	{ "statfile",            KW_STATPAGE },
 
+	/* proxy types */
+	{ "http",               KW_PROXY_HTTP },
+	{ "socks4",             KW_PROXY_SOCKS4 },
+	{ "socks5",             KW_PROXY_SOCKS5 },
+
         /* loglevel and the settings */
         { "loglevel",            KW_LOGLEVEL },
 	{ "critical",		 KW_LOG_CRITICAL },

@@ -21,6 +21,6 @@
 
 extern void handle_connection(int fd);
 extern void add_connect_port_allowed(int port);
-extern void upstream_add(const char *host, int port, const char *domain);
+extern void upstream_add(const char *host, int port, const char *domain, proxy_type type);
 
 #endif
