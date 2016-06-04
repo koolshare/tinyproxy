@@ -37,3 +37,4 @@ config.status
 libtool
 stamp-h
 src/tinyproxy
+tiny

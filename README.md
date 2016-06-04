@@ -1,5 +1,10 @@
 # tinyproxy
+
 add socks4/5 support
+
+# build
+
+CC=arm-brcm-linux-uclibcgnueabi-gcc ./configure --host=arm-linux
 
 
  DESCRIPTION
