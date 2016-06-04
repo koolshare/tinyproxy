@@ -30,3 +30,10 @@
 
 # Debug files
 *.dSYM/
+
+config.h
+config.log
+config.status
+libtool
+stamp-h
+src/tinyproxy

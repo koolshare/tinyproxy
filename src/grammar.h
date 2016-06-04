@@ -1,27 +1,37 @@
-/* A Bison parser, made by GNU Bison 1.875a.  */
 
-/* Skeleton parser for Yacc-like parsing with Bison,
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+/* A Bison parser, made by GNU Bison 2.4.1.  */
 
-   This program is free software; you can redistribute it and/or modify
+/* Skeleton interface for Bison's Yacc-like parsers in C
+   
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
+   
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* As a special exception, when this file is copied by Bison into a
-   Bison output file, you may use that output file without restriction.
-   This special exception was added by the Free Software Foundation
-   in version 1.24 of Bison.  */
+/* As a special exception, you may create a larger work that contains
+   part or all of the Bison parser skeleton and distribute that work
+   under terms of your choice, so long as that work isn't itself a
+   parser generator using the skeleton or a modified version thereof
+   as a parser skeleton.  Alternatively, if you modify or redistribute
+   the parser skeleton itself, you may (at your option) remove this
+   special exception, which will cause the skeleton and the resulting
+   Bison output files to be licensed under the GNU General Public
+   License without this special exception.
+   
+   This special exception was added by the Free Software Foundation in
+   version 2.2 of Bison.  */
+
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -59,22 +69,26 @@
      KW_DEFAULT_ERRORPAGE = 285,
      KW_STATPAGE = 286,
      KW_VIA_PROXY_NAME = 287,
-     KW_YES = 288,
-     KW_NO = 289,
-     KW_LOGLEVEL = 290,
-     KW_LOG_CRITICAL = 291,
-     KW_LOG_ERROR = 292,
-     KW_LOG_WARNING = 293,
-     KW_LOG_NOTICE = 294,
-     KW_LOG_CONNECT = 295,
-     KW_LOG_INFO = 296,
-     IDENTIFIER = 297,
-     NUMBER = 298,
-     STRING = 299,
-     NUMERIC_ADDRESS = 300,
-     NETMASK_ADDRESS = 301
+     KW_PROXY_HTTP = 288,
+     KW_PROXY_SOCKS4 = 289,
+     KW_PROXY_SOCKS5 = 290,
+     KW_YES = 291,
+     KW_NO = 292,
+     KW_LOGLEVEL = 293,
+     KW_LOG_CRITICAL = 294,
+     KW_LOG_ERROR = 295,
+     KW_LOG_WARNING = 296,
+     KW_LOG_NOTICE = 297,
+     KW_LOG_CONNECT = 298,
+     KW_LOG_INFO = 299,
+     IDENTIFIER = 300,
+     NUMBER = 301,
+     STRING = 302,
+     NUMERIC_ADDRESS = 303,
+     NETMASK_ADDRESS = 304
    };
 #endif
+/* Tokens.  */
 #define KW_PORT 258
 #define KW_LISTEN 259
 #define KW_LOGFILE 260
@@ -105,38 +119,47 @@
 #define KW_DEFAULT_ERRORPAGE 285
 #define KW_STATPAGE 286
 #define KW_VIA_PROXY_NAME 287
-#define KW_YES 288
-#define KW_NO 289
-#define KW_LOGLEVEL 290
-#define KW_LOG_CRITICAL 291
-#define KW_LOG_ERROR 292
-#define KW_LOG_WARNING 293
-#define KW_LOG_NOTICE 294
-#define KW_LOG_CONNECT 295
-#define KW_LOG_INFO 296
-#define IDENTIFIER 297
-#define NUMBER 298
-#define STRING 299
-#define NUMERIC_ADDRESS 300
-#define NETMASK_ADDRESS 301
+#define KW_PROXY_HTTP 288
+#define KW_PROXY_SOCKS4 289
+#define KW_PROXY_SOCKS5 290
+#define KW_YES 291
+#define KW_NO 292
+#define KW_LOGLEVEL 293
+#define KW_LOG_CRITICAL 294
+#define KW_LOG_ERROR 295
+#define KW_LOG_WARNING 296
+#define KW_LOG_NOTICE 297
+#define KW_LOG_CONNECT 298
+#define KW_LOG_INFO 299
+#define IDENTIFIER 300
+#define NUMBER 301
+#define STRING 302
+#define NUMERIC_ADDRESS 303
+#define NETMASK_ADDRESS 304
 
 
 
 
-#if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
+#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+typedef union YYSTYPE
+{
+
+/* Line 1676 of yacc.c  */
 #line 37 "grammar.y"
-typedef union YYSTYPE {
+
 	unsigned int num;
 	char *cptr;
+
+
+
+/* Line 1676 of yacc.c  */
+#line 157 "y.tab.h"
 } YYSTYPE;
-/* Line 1240 of yacc.c.  */
-#line 134 "y.tab.h"
+# define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
-# define YYSTYPE_IS_TRIVIAL 1
 #endif
 
 extern YYSTYPE yylval;
-
 
 
