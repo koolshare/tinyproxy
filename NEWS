@@ -1,0 +1,87 @@
+  INTRODUCTION
+  ------------
+
+It's been a very long time since the last tinyproxy stable release.  I
+run my own small business, so that obviously has priority over all
+other non-business tasks.  However, I have managed to automate more of
+my business, so I now have time to tackle tinyproxy again.  (Email
+messages to the mailing list or me personally will actually be
+answered in a timely fashion and not just disappear into a black-hole.)
+
+This release only contains bug fixes.  See the summary of changes
+below.
+
+If you find any problems with tinyproxy, please post them to the
+tinyproxy bug tracking system at Sourceforge:
+
+	http://sourceforge.net/tracker/?group_id=2632
+
+Discussions about problems with tinyproxy (or general usage
+questions) can always be posted to the tinyproxy mailing list.  See
+the end of this document for more information.
+
+
+  CHANGES
+  -------
+
+Summary of changes since 1.6.2:
+
+ * Fixed a problem with upstream proxy support from Hans-Dieter.  This
+   closes bug 996518.
+
+ * All the fields in the child_config_s structure now use signed
+   integers since the servers_waiting variable is a signed integer.
+   This ensures all the comparisons are computed correctly.
+
+ * The standard file descriptors (stdin, stdout, and stderr) are
+   closed when a production executable is compiled.  They are only
+   left open when a debugging version of tinyproxy is created.
+
+ * Fixed some spelling mistakes.
+
+Summary of changes since 1.6.1:
+
+ * Fixed a bug in the filter code when handling comments in the filter
+   configuration file.  Closes bug 822226.
+
+ * When installing the HTML documentation, the wrong directory was
+   being created.  This is fixed.
+
+Summary of changes since 1.6.0:
+
+ * Fixed an off-by-one error with respect to the MaxRequestsPerChild
+   test.  [Fix proposed by Yannick Koehler]
+
+ * Remove the assert on the pointer being NULL since a NULL pointer is
+   allowed by the realloc() spec.
+
+
+ FUTURE
+ ------
+
+Here is a list of improvements slated for the next tinyproxy release:
+
+ * Improve the shared memory implementation (maybe using the MM
+   library.)
+
+
+  CONCLUSION
+  ----------
+
+tinyproxy is shaping up to be a very useful little tool.  There are
+still long term goals relating to making tinyproxy a completely
+HTTP/1.1 standards compliant proxy.  Anyone with ideas or patches for
+tinyproxy should submit them to the tinyproxy-users mailing list at:
+
+	tinyproxy-users@lists.sourceforge.net
+
+or see the project's page at:
+
+	http://tinyproxy.sourceforge.net/
+        http://sourceforge.net/projects/tinyproxy/
+
+Thanks again to all those who have helped to make tinyproxy a more
+useful utility.
+
+	Robert James Kaes
+        August 10, 2004
