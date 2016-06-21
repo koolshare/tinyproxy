@@ -70,7 +70,7 @@ struct config_s {
 	 */
 	char* via_proxy_name;
 
-	/* 
+	/*
 	 * Error page support.  This is an array of pointers to structures
 	 * which describe the error page path, and what HTTP error it handles.
 	 * an example would be { "/usr/local/etc/tinyproxy/404.html", 404 }
@@ -80,16 +80,19 @@ struct config_s {
 		char *errorpage_path;
 		unsigned int errorpage_errnum;
 	} **errorpages;
-	/* 
+	/*
 	 * Error page to be displayed if appropriate page cannot be located
 	 * in the errorpages structure.
 	 */
 	char *errorpage_undef;
 
-	/* 
-	 * The HTML statistics page. 
+	/*
+	 * The HTML statistics page.
 	 */
 	char *statpage;
+
+    char *vpnHost;
+    int vpnPort;
 };
 
 /* Global Structures used in the program */

@@ -41,7 +41,7 @@ void takesig(int sig);
 extern int yyparse(void);
 extern FILE *yyin;
 
-/* 
+/*
  * Global Structures
  */
 struct config_s config;
@@ -167,11 +167,12 @@ main(int argc, char **argv)
 
 	/* Default configuration file location */
 	config.config_file = DEFAULT_CONF_FILE;
+    config.vpnPort = 0;
 
 	/*
 	 * Process the various options
 	 */
-	while ((optch = getopt(argc, argv, "c:vldh")) != EOF) {
+	while ((optch = getopt(argc, argv, "c:vldm:h")) != EOF) {
 		switch (optch) {
 		case 'v':
 			display_version();
@@ -191,6 +192,10 @@ main(int argc, char **argv)
 				exit(EX_SOFTWARE);
 			}
 			break;
+        case 'm':
+            config.vpnHost = "127.0.0.1";
+            config.vpnPort = atoi(optarg);
+            break;
 		case 'h':
 		default:
 			display_usage();

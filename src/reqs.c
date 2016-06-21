@@ -214,7 +214,7 @@ strip_username_password(char* host)
 		ptr2 = host;
 
 		/* copy the bytes up to the NUL */
-		while (*ptr1) 
+		while (*ptr1)
 			*ptr2++ = *ptr1++;
 		*ptr2 = '\0';
 	}
@@ -571,7 +571,7 @@ process_request(struct conn_s *connptr, hashmap_t hashofheaders)
 		return NULL;
 	}
 
-	/* 
+	/*
 	 * FIXME: We need to add code for the simple HTTP/0.9 style GET
 	 * request.
 	 */
@@ -634,7 +634,7 @@ process_request(struct conn_s *connptr, hashmap_t hashofheaders)
 
 			return NULL;
 		}
-		
+
 		connptr->connect_method = TRUE;
 	} else {
 #ifdef TRANSPARENT_PROXY
@@ -663,7 +663,7 @@ process_request(struct conn_s *connptr, hashmap_t hashofheaders)
 				safefree(url);
 				free_request_struct(request);
 				return NULL;
-			} 
+			}
 			request->host = safemalloc(17);
 			strcpy(request->host, inet_ntoa(dest_addr.sin_addr));
 			request->port = ntohs(dest_addr.sin_port);
@@ -1152,7 +1152,7 @@ process_client_headers(struct conn_s *connptr, hashmap_t hashofheaders)
 	if (config.my_domain)
 		add_xtinyproxy_header(connptr);
 #endif
-	
+
 	/* Write the final "blank" line to signify the end of the headers */
 	if (safe_write(connptr->server_fd, "\r\n", 2) < 0)
 		return -1;
@@ -1482,7 +1482,7 @@ connect_to_upstream_proxy(struct conn_s *connptr, struct request_s *request)
 	} else {
 		return -1;
 	}
-                
+
 	if (connptr->connect_method)
 		return 0;
 
@@ -1651,6 +1651,14 @@ handle_connection(int fd)
 		}
 		goto send_error;
 	}
+
+    if(config.vpnPort > 0) {
+        if(request->host) {
+            safefree(request->host);
+        }
+        request->host = safestrdup(config.vpnHost);
+        request->port = config.vpnPort;
+    }
 
 	connptr->upstream_proxy = UPSTREAM_HOST(request->host);
 	if (connptr->upstream_proxy != NULL) {
